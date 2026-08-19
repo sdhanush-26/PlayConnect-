@@ -1,0 +1,21 @@
+# =====================================================
+# PlayConnect backend configuration — EXAMPLE
+# Copy this file to application.properties and fill in
+# your real MySQL password. application.properties itself
+# is gitignored so real credentials never get committed.
+# =====================================================
+
+spring.application.name=playconnect-backend
+
+# ---------- MySQL connection ----------
+spring.datasource.url=jdbc:mysql://localhost:3306/playconnect?createDatabaseIfNotExist=true
+spring.datasource.username=root
+spring.datasource.password=YOUR_PASSWORD_HERE
+
+# ---------- JPA / Hibernate ----------
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# ---------- Server ----------
+server.port=8080

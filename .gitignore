@@ -21,3 +21,18 @@ dist/
 
 # OS
 .DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# STS / Eclipse
+.classpath
+.factorypath
+.project
+.settings/
+bin/
+
+# Sensitive config (contains real DB password)
+playconnect-backend/src/main/resources/application.properties
