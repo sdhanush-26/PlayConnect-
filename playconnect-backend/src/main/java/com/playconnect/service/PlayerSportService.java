@@ -74,4 +74,32 @@ public class PlayerSportService {
                         "No sport record found for this player/sport combination"));
         playerSportRepository.delete(existing);
     }
+
+    // Search with optional sport/skill filters, plus optional distance
+    // filtering done in application code (small dataset — fine for now;
+    // Day 32/33 revisit this with a proper Haversine SQL query once
+    // "nearby" search is the actual focus rather than a bonus filter here).
+    public List<PlayerSport> searchPlayers(Long sportId, com.playconnect.entity.SkillLevel skillLevel,
+                                            Double latitude, Double longitude, Double radiusKm) {
+        List<PlayerSport> results = playerSportRepository.searchPlayers(sportId, skillLevel);
+
+        if (latitude != null && longitude != null && radiusKm != null) {
+            results = results.stream()
+                    .filter(ps -> withinRadius(latitude, longitude,
+                            ps.getUser().getLatitude(), ps.getUser().getLongitude(), radiusKm))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        return results;
+    }
+
+    // Simple flat-earth approximation — good enough for city-scale radius
+    // filtering. Day 32 introduces the more accurate Haversine formula.
+    private boolean withinRadius(double lat1, double lon1, Double lat2, Double lon2, double radiusKm) {
+        if (lat2 == null || lon2 == null) return false;
+        double latDiff = lat1 - lat2;
+        double lonDiff = lon1 - lon2;
+        double approxKm = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111; // ~111km per degree
+        return approxKm <= radiusKm;
+    }
 }
