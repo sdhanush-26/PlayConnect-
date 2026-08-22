@@ -8,10 +8,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Test in Postman:
@@ -68,5 +68,18 @@ public class MatchController {
                 request.getMaxPlayers()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MatchResponse>> getAllMatches() {
+        List<MatchResponse> responses = matchService.getAllMatches().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MatchResponse> getMatch(@PathVariable Long id) {
+        return ResponseEntity.ok(toResponse(matchService.getMatch(id)));
     }
 }

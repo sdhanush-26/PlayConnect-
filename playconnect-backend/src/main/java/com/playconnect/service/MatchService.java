@@ -50,4 +50,14 @@ public class MatchService {
 
         return matchRepository.save(match);
     }
+
+    public java.util.List<Match> getAllMatches() {
+        return matchRepository.findAll();
+    }
+
+    public Match getMatch(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new com.playconnect.exception.PlayerNotFoundException(
+                        "Match not found with id: " + id));
+    }
 }
