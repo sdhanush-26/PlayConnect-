@@ -74,8 +74,8 @@ public class MatchService {
             throw new InvalidMatchException("This player has already joined this match");
         }
 
-        if (match.getStatus() == MatchStatus.CANCELLED || match.getStatus() == MatchStatus.COMPLETED) {
-            throw new InvalidMatchException("Cannot join a " + match.getStatus() + " match");
+        if (match.getStatus() != MatchStatus.OPEN) {
+            throw new InvalidMatchException("Cannot join a match with status " + match.getStatus());
         }
 
         long currentPlayers = matchPlayerRepository.countByMatchId(matchId);
@@ -160,5 +160,47 @@ public class MatchService {
     public java.util.List<MatchPlayer> getMatchPlayers(Long matchId) {
         getMatch(matchId); // ensures the match itself exists first
         return matchPlayerRepository.findByMatchId(matchId);
+    }
+
+    // Explicit status transitions, each creator-only and each rejecting
+    // moves that don't make sense (e.g. starting an already-completed
+    // match). Keeping these as separate methods rather than one generic
+    // "setStatus" keeps the allowed-transition rules visible and testable.
+
+    public Match startMatch(Long matchId, Long requesterId) {
+        Match match = getMatch(matchId);
+        requireCreator(match, requesterId);
+
+        if (match.getStatus() != MatchStatus.OPEN && match.getStatus() != MatchStatus.FULL) {
+            throw new InvalidMatchException(
+                    "Cannot start a match with status " + match.getStatus());
+        }
+        match.setStatus(MatchStatus.STARTED);
+        return matchRepository.save(match);
+    }
+
+    public Match completeMatch(Long matchId, Long requesterId) {
+        Match match = getMatch(matchId);
+        requireCreator(match, requesterId);
+
+        if (match.getStatus() != MatchStatus.STARTED) {
+            throw new InvalidMatchException(
+                    "Cannot complete a match that hasn't been started (current status: "
+                            + match.getStatus() + ")");
+        }
+        match.setStatus(MatchStatus.COMPLETED);
+        return matchRepository.save(match);
+    }
+
+    public Match cancelMatch(Long matchId, Long requesterId) {
+        Match match = getMatch(matchId);
+        requireCreator(match, requesterId);
+
+        if (match.getStatus() == MatchStatus.COMPLETED || match.getStatus() == MatchStatus.CANCELLED) {
+            throw new InvalidMatchException(
+                    "Cannot cancel a match with status " + match.getStatus());
+        }
+        match.setStatus(MatchStatus.CANCELLED);
+        return matchRepository.save(match);
     }
 }

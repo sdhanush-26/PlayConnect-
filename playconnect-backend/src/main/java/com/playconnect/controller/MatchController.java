@@ -137,4 +137,22 @@ public class MatchController {
         matchService.removePlayer(id, userId, requesterId);
         return ResponseEntity.noContent().build();
     }
+
+    // PUT /api/matches/{id}/start?requesterId=1
+    @PutMapping("/{id}/start")
+    public ResponseEntity<MatchResponse> startMatch(@PathVariable Long id, @RequestParam Long requesterId) {
+        return ResponseEntity.ok(toResponse(matchService.startMatch(id, requesterId)));
+    }
+
+    // PUT /api/matches/{id}/complete?requesterId=1
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<MatchResponse> completeMatch(@PathVariable Long id, @RequestParam Long requesterId) {
+        return ResponseEntity.ok(toResponse(matchService.completeMatch(id, requesterId)));
+    }
+
+    // PUT /api/matches/{id}/cancel?requesterId=1
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<MatchResponse> cancelMatch(@PathVariable Long id, @RequestParam Long requesterId) {
+        return ResponseEntity.ok(toResponse(matchService.cancelMatch(id, requesterId)));
+    }
 }
