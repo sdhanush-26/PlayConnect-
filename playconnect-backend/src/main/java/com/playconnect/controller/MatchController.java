@@ -1,8 +1,11 @@
 package com.playconnect.controller;
 
+import com.playconnect.dto.MatchPlayerResponse;
 import com.playconnect.dto.MatchRequest;
 import com.playconnect.dto.MatchResponse;
+import com.playconnect.entity.JoinStatus;
 import com.playconnect.entity.Match;
+import com.playconnect.entity.MatchPlayer;
 import com.playconnect.service.MatchService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +100,41 @@ public class MatchController {
     @DeleteMapping("/{id}/leave")
     public ResponseEntity<Void> leaveMatch(@PathVariable Long id, @RequestParam Long userId) {
         matchService.leaveMatch(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    private MatchPlayerResponse toPlayerResponse(MatchPlayer mp) {
+        return new MatchPlayerResponse(
+                mp.getId(), mp.getUser().getId(), mp.getUser().getName(), mp.getJoinStatus());
+    }
+
+    // GET /api/matches/{id}/players — full roster with join status.
+    @GetMapping("/{id}/players")
+    public ResponseEntity<List<MatchPlayerResponse>> getMatchPlayers(@PathVariable Long id) {
+        List<MatchPlayerResponse> responses = matchService.getMatchPlayers(id).stream()
+                .map(this::toPlayerResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    // PUT /api/matches/{id}/players/{userId}?requesterId=1&status=ACCEPTED
+    // requesterId identifies the creator making the request — becomes
+    // "current logged-in user" automatically once JWT auth exists (Day 40+).
+    @PutMapping("/{id}/players/{userId}")
+    public ResponseEntity<MatchPlayerResponse> respondToJoinRequest(
+            @PathVariable Long id, @PathVariable Long userId,
+            @RequestParam Long requesterId, @RequestParam JoinStatus status) {
+        MatchPlayer updated = matchService.respondToJoinRequest(id, userId, requesterId, status);
+        return ResponseEntity.ok(toPlayerResponse(updated));
+    }
+
+    // DELETE /api/matches/{id}/players/{userId}?requesterId=1
+    // Creator-initiated removal — distinct from leaveMatch, which is
+    // player-initiated and requires no permission check.
+    @DeleteMapping("/{id}/players/{userId}")
+    public ResponseEntity<Void> removePlayer(
+            @PathVariable Long id, @PathVariable Long userId, @RequestParam Long requesterId) {
+        matchService.removePlayer(id, userId, requesterId);
         return ResponseEntity.noContent().build();
     }
 }

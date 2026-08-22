@@ -117,4 +117,48 @@ public class MatchService {
             matchRepository.save(match);
         }
     }
+
+    // Every creator-only action below checks requesterId == match.creator
+    // before doing anything — this is the enforcement point for "only
+    // the person who made the match can manage its players", ahead of
+    // proper role-based auth arriving on Day 42.
+    private void requireCreator(Match match, Long requesterId) {
+        if (!match.getCreator().getId().equals(requesterId)) {
+            throw new InvalidMatchException("Only the match creator can perform this action");
+        }
+    }
+
+    public MatchPlayer respondToJoinRequest(Long matchId, Long targetUserId,
+                                             Long requesterId, JoinStatus newStatus) {
+        Match match = getMatch(matchId);
+        requireCreator(match, requesterId);
+
+        MatchPlayer matchPlayer = matchPlayerRepository.findByMatchIdAndUserId(matchId, targetUserId)
+                .orElseThrow(() -> new InvalidMatchException(
+                        "This player has not requested to join this match"));
+
+        matchPlayer.setJoinStatus(newStatus);
+        return matchPlayerRepository.save(matchPlayer);
+    }
+
+    public void removePlayer(Long matchId, Long targetUserId, Long requesterId) {
+        Match match = getMatch(matchId);
+        requireCreator(match, requesterId);
+
+        MatchPlayer matchPlayer = matchPlayerRepository.findByMatchIdAndUserId(matchId, targetUserId)
+                .orElseThrow(() -> new InvalidMatchException(
+                        "This player is not part of this match"));
+
+        matchPlayerRepository.delete(matchPlayer);
+
+        if (match.getStatus() == MatchStatus.FULL) {
+            match.setStatus(MatchStatus.OPEN);
+            matchRepository.save(match);
+        }
+    }
+
+    public java.util.List<MatchPlayer> getMatchPlayers(Long matchId) {
+        getMatch(matchId); // ensures the match itself exists first
+        return matchPlayerRepository.findByMatchId(matchId);
+    }
 }
