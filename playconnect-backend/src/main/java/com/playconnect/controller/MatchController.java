@@ -82,4 +82,14 @@ public class MatchController {
     public ResponseEntity<MatchResponse> getMatch(@PathVariable Long id) {
         return ResponseEntity.ok(toResponse(matchService.getMatch(id)));
     }
+
+    // POST /api/matches/{id}/join?userId=2
+    // userId as a query param for now — becomes "current logged-in user"
+    // automatically once JWT auth exists (Day 40+), removing the need
+    // for the client to pass it explicitly.
+    @PostMapping("/{id}/join")
+    public ResponseEntity<Void> joinMatch(@PathVariable Long id, @RequestParam Long userId) {
+        matchService.joinMatch(id, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
