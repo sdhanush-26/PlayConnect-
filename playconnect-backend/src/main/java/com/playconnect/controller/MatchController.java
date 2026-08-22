@@ -92,4 +92,11 @@ public class MatchController {
         matchService.joinMatch(id, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // DELETE /api/matches/{id}/leave?userId=2
+    @DeleteMapping("/{id}/leave")
+    public ResponseEntity<Void> leaveMatch(@PathVariable Long id, @RequestParam Long userId) {
+        matchService.leaveMatch(id, userId);
+        return ResponseEntity.noContent().build();
+    }
 }

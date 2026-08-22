@@ -99,4 +99,22 @@ public class MatchService {
 
         return saved;
     }
+
+    // Removes a player from a match. If the match was FULL, un-fills it
+    // back to OPEN — mirrors the status flip in joinMatch so the two
+    // operations stay symmetric.
+    public void leaveMatch(Long matchId, Long userId) {
+        Match match = getMatch(matchId);
+
+        MatchPlayer matchPlayer = matchPlayerRepository.findByMatchIdAndUserId(matchId, userId)
+                .orElseThrow(() -> new InvalidMatchException(
+                        "This player has not joined this match"));
+
+        matchPlayerRepository.delete(matchPlayer);
+
+        if (match.getStatus() == MatchStatus.FULL) {
+            match.setStatus(MatchStatus.OPEN);
+            matchRepository.save(match);
+        }
+    }
 }
