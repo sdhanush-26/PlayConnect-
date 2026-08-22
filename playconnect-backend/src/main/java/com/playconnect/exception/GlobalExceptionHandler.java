@@ -35,6 +35,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    // 400 — thrown by MatchService for logically invalid match data
+    // (e.g. endTime before startTime) that isn't a simple field-level
+    // validation failure, so @Valid alone can't catch it.
+    @ExceptionHandler(InvalidMatchException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidMatch(InvalidMatchException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     // 400 — triggered by @Valid failures on UserRequest (blank name,
     // malformed email, etc.). Spring throws this automatically; we just
     // reshape its output into our consistent error format, listing every
