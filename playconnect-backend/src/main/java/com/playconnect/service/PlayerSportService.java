@@ -99,4 +99,22 @@ public class PlayerSportService {
         if (lat2 == null || lon2 == null) return false;
         return com.playconnect.util.GeoUtils.distanceKm(lat1, lon1, lat2, lon2) <= radiusKm;
     }
+
+    // Dedicated nearby-players lookup: unlike searchPlayers (Day 20),
+    // latitude/longitude/radius are required here rather than optional,
+    // and results come back sorted closest-first — matching what a
+    // "players near me" screen actually needs versus general search.
+    public record NearbyResult(PlayerSport playerSport, double distanceKm) {}
+
+    public List<NearbyResult> findNearbyPlayers(Double latitude, Double longitude, Double radiusKm, Long sportId) {
+        List<PlayerSport> candidates = playerSportRepository.searchPlayers(sportId, null);
+
+        return candidates.stream()
+                .filter(ps -> ps.getUser().getLatitude() != null && ps.getUser().getLongitude() != null)
+                .map(ps -> new NearbyResult(ps, com.playconnect.util.GeoUtils.distanceKm(
+                        latitude, longitude, ps.getUser().getLatitude(), ps.getUser().getLongitude())))
+                .filter(result -> result.distanceKm() <= radiusKm)
+                .sorted((a, b) -> Double.compare(a.distanceKm(), b.distanceKm()))
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

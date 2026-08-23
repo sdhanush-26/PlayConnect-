@@ -21,4 +21,5 @@ public class PlayerSearchResponse {
     private Double longitude;
     private String sportName;
     private SkillLevel skillLevel;
+    private Double distanceKm; // null when no reference point was given
 }

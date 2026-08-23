@@ -54,8 +54,41 @@ public class PlayerSearchController {
                         ps.getUser().getLatitude(),
                         ps.getUser().getLongitude(),
                         ps.getSport().getName(),
-                        ps.getSkillLevel()
+                        ps.getSkillLevel(),
+                        null // distance not calculated for general search
                 ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // GET /api/players/nearby?latitude=14.68&longitude=77.60&radiusKm=10&sportId=1
+    // latitude/longitude/radiusKm are all required here — this endpoint's
+    // whole purpose is proximity, unlike /api/players where location is
+    // just one of several optional filters.
+    @GetMapping("/api/players/nearby")
+    public ResponseEntity<List<PlayerSearchResponse>> nearbyPlayers(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam Double radiusKm,
+            @RequestParam(required = false) Long sportId) {
+
+        List<PlayerSportService.NearbyResult> results =
+                playerSportService.findNearbyPlayers(latitude, longitude, radiusKm, sportId);
+
+        List<PlayerSearchResponse> response = results.stream()
+                .map(result -> {
+                    PlayerSport ps = result.playerSport();
+                    return new PlayerSearchResponse(
+                            ps.getUser().getId(),
+                            ps.getUser().getName(),
+                            ps.getUser().getLatitude(),
+                            ps.getUser().getLongitude(),
+                            ps.getSport().getName(),
+                            ps.getSkillLevel(),
+                            Math.round(result.distanceKm() * 10) / 10.0 // round to 1 decimal
+                    );
+                })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
