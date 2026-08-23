@@ -203,4 +203,46 @@ public class MatchService {
         match.setStatus(MatchStatus.CANCELLED);
         return matchRepository.save(match);
     }
+
+    // A user's full match involvement: matches they created, plus
+    // matches they joined (regardless of accept/reject status — the
+    // history view shows everything they were part of). Deduplicated
+    // since a creator could theoretically also appear in match_players
+    // for their own match.
+    public java.util.List<Match> getMatchHistory(Long userId) {
+        userService.getUser(userId); // 404 if the user itself doesn't exist
+
+        java.util.List<Match> created = matchRepository.findByCreatorId(userId);
+
+        java.util.List<MatchPlayer> playerRows = matchPlayerRepository.findAll().stream()
+                .filter(mp -> mp.getUser().getId().equals(userId))
+                .collect(java.util.stream.Collectors.toList());
+
+        java.util.Set<Match> combined = new java.util.LinkedHashSet<>(created);
+        for (MatchPlayer mp : playerRows) {
+            combined.add(mp.getMatch());
+        }
+
+        return new java.util.ArrayList<>(combined);
+    }
+
+    // Convenience filters built on top of getMatchHistory — used by the
+    // three tabs the plan calls for (Upcoming / Completed / Cancelled).
+    public java.util.List<Match> getUpcomingMatches(Long userId) {
+        return getMatchHistory(userId).stream()
+                .filter(m -> m.getStatus() == MatchStatus.OPEN || m.getStatus() == MatchStatus.FULL)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public java.util.List<Match> getCompletedMatches(Long userId) {
+        return getMatchHistory(userId).stream()
+                .filter(m -> m.getStatus() == MatchStatus.COMPLETED)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public java.util.List<Match> getCancelledMatches(Long userId) {
+        return getMatchHistory(userId).stream()
+                .filter(m -> m.getStatus() == MatchStatus.CANCELLED)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

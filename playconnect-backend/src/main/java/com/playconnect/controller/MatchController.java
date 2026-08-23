@@ -155,4 +155,25 @@ public class MatchController {
     public ResponseEntity<MatchResponse> cancelMatch(@PathVariable Long id, @RequestParam Long requesterId) {
         return ResponseEntity.ok(toResponse(matchService.cancelMatch(id, requesterId)));
     }
+
+    // GET /api/matches/user/{userId}/upcoming
+    @GetMapping("/user/{userId}/upcoming")
+    public ResponseEntity<List<MatchResponse>> getUpcomingMatches(@PathVariable Long userId) {
+        return ResponseEntity.ok(matchService.getUpcomingMatches(userId).stream()
+                .map(this::toResponse).collect(Collectors.toList()));
+    }
+
+    // GET /api/matches/user/{userId}/completed
+    @GetMapping("/user/{userId}/completed")
+    public ResponseEntity<List<MatchResponse>> getCompletedMatches(@PathVariable Long userId) {
+        return ResponseEntity.ok(matchService.getCompletedMatches(userId).stream()
+                .map(this::toResponse).collect(Collectors.toList()));
+    }
+
+    // GET /api/matches/user/{userId}/cancelled
+    @GetMapping("/user/{userId}/cancelled")
+    public ResponseEntity<List<MatchResponse>> getCancelledMatches(@PathVariable Long userId) {
+        return ResponseEntity.ok(matchService.getCancelledMatches(userId).stream()
+                .map(this::toResponse).collect(Collectors.toList()));
+    }
 }
