@@ -97,9 +97,6 @@ public class PlayerSportService {
     // filtering. Day 32 introduces the more accurate Haversine formula.
     private boolean withinRadius(double lat1, double lon1, Double lat2, Double lon2, double radiusKm) {
         if (lat2 == null || lon2 == null) return false;
-        double latDiff = lat1 - lat2;
-        double lonDiff = lon1 - lon2;
-        double approxKm = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111; // ~111km per degree
-        return approxKm <= radiusKm;
+        return com.playconnect.util.GeoUtils.distanceKm(lat1, lon1, lat2, lon2) <= radiusKm;
     }
 }
