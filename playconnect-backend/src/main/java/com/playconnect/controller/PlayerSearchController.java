@@ -93,4 +93,36 @@ public class PlayerSearchController {
 
         return ResponseEntity.ok(response);
     }
+
+    // GET /api/players/nearby/me?userId=1&radiusKm=10&sportId=1
+    // "Current location" search — uses the requesting user's own saved
+    // coordinates rather than requiring them to pass lat/long explicitly.
+    // Once JWT auth exists (Day 40+), userId comes from the token instead
+    // of a query param, but the underlying logic stays the same.
+    @GetMapping("/api/players/nearby/me")
+    public ResponseEntity<List<PlayerSearchResponse>> nearbyPlayersForMe(
+            @RequestParam Long userId,
+            @RequestParam Double radiusKm,
+            @RequestParam(required = false) Long sportId) {
+
+        List<PlayerSportService.NearbyResult> results =
+                playerSportService.findNearbyPlayersForUser(userId, radiusKm, sportId);
+
+        List<PlayerSearchResponse> response = results.stream()
+                .map(result -> {
+                    PlayerSport ps = result.playerSport();
+                    return new PlayerSearchResponse(
+                            ps.getUser().getId(),
+                            ps.getUser().getName(),
+                            ps.getUser().getLatitude(),
+                            ps.getUser().getLongitude(),
+                            ps.getSport().getName(),
+                            ps.getSkillLevel(),
+                            Math.round(result.distanceKm() * 10) / 10.0
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
 }

@@ -117,4 +117,19 @@ public class PlayerSportService {
                 .sorted((a, b) -> Double.compare(a.distanceKm(), b.distanceKm()))
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    // "Current location" search — uses the requesting user's own stored
+    // latitude/longitude (set during registration/profile update) rather
+    // than requiring the caller to pass coordinates explicitly. The
+    // "manual location" alternative from the Day 35 plan is just calling
+    // findNearbyPlayers directly with whatever coordinates the user
+    // picked on a map — no separate backend method needed for that case.
+    public List<NearbyResult> findNearbyPlayersForUser(Long requestingUserId, Double radiusKm, Long sportId) {
+        User requester = userService.getUser(requestingUserId);
+        if (requester.getLatitude() == null || requester.getLongitude() == null) {
+            throw new IllegalArgumentException(
+                    "This user has no saved location. Set a location first, or search with explicit coordinates.");
+        }
+        return findNearbyPlayers(requester.getLatitude(), requester.getLongitude(), radiusKm, sportId);
+    }
 }
