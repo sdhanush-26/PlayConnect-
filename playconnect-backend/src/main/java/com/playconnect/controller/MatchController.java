@@ -42,6 +42,10 @@ public class MatchController {
     }
 
     private MatchResponse toResponse(Match match) {
+        return toResponse(match, null);
+    }
+
+    private MatchResponse toResponse(Match match, Double distanceKm) {
         return new MatchResponse(
                 match.getId(),
                 match.getTitle(),
@@ -54,7 +58,8 @@ public class MatchController {
                 match.getStartTime(),
                 match.getEndTime(),
                 match.getMaxPlayers(),
-                match.getStatus()
+                match.getStatus(),
+                distanceKm
         );
     }
 
@@ -175,5 +180,24 @@ public class MatchController {
     public ResponseEntity<List<MatchResponse>> getCancelledMatches(@PathVariable Long userId) {
         return ResponseEntity.ok(matchService.getCancelledMatches(userId).stream()
                 .map(this::toResponse).collect(Collectors.toList()));
+    }
+
+    // GET /api/matches/nearby?latitude=14.68&longitude=77.60&radiusKm=25&sportId=1
+    // Uses the match creator's location as a stand-in for the match's
+    // own location — see the comment on MatchService.findNearbyMatches
+    // for why, and what replaces this once Ground exists (Day 36).
+    @GetMapping("/nearby")
+    public ResponseEntity<List<MatchResponse>> nearbyMatches(
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam Double radiusKm,
+            @RequestParam(required = false) Long sportId) {
+
+        List<MatchResponse> responses = matchService.findNearbyMatches(latitude, longitude, radiusKm, sportId)
+                .stream()
+                .map(result -> toResponse(result.match(), Math.round(result.distanceKm() * 10) / 10.0))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
     }
 }

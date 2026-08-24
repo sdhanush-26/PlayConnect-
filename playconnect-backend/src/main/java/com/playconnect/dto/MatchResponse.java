@@ -24,4 +24,5 @@ public class MatchResponse {
     private LocalTime endTime;
     private Integer maxPlayers;
     private MatchStatus status;
+    private Double distanceKm; // null unless returned from the nearby-matches endpoint
 }

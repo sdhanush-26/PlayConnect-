@@ -245,4 +245,28 @@ public class MatchService {
                 .filter(m -> m.getStatus() == MatchStatus.CANCELLED)
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    // Nearby matches, using the match CREATOR's stored location as a
+    // stand-in for the match's own location. This is a known
+    // simplification — Match doesn't have real coordinates of its own
+    // until Ground exists (Day 36) and match.location becomes a proper
+    // @ManyToOne relationship instead of free text. Documented here so
+    // it's clear this is deliberate, not an oversight.
+    public record NearbyMatchResult(Match match, double distanceKm) {}
+
+    public java.util.List<NearbyMatchResult> findNearbyMatches(Double latitude, Double longitude,
+                                                                  Double radiusKm, Long sportId) {
+        java.util.List<Match> candidates = sportId != null
+                ? matchRepository.findBySportId(sportId)
+                : matchRepository.findAll();
+
+        return candidates.stream()
+                .filter(m -> m.getStatus() == MatchStatus.OPEN) // only matches you could actually join
+                .filter(m -> m.getCreator().getLatitude() != null && m.getCreator().getLongitude() != null)
+                .map(m -> new NearbyMatchResult(m, com.playconnect.util.GeoUtils.distanceKm(
+                        latitude, longitude, m.getCreator().getLatitude(), m.getCreator().getLongitude())))
+                .filter(result -> result.distanceKm() <= radiusKm)
+                .sorted((a, b) -> Double.compare(a.distanceKm(), b.distanceKm()))
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
