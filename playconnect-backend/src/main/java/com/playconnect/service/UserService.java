@@ -4,34 +4,53 @@ import com.playconnect.entity.User;
 import com.playconnect.exception.PlayerNotFoundException;
 import com.playconnect.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Business logic layer. Controllers (Day 12) will call these methods —
- * they never talk to UserRepository directly. This is also where rules
- * that don't belong in the database go (e.g. rejecting a duplicate email
- * with a clear message before Hibernate would throw a raw SQL exception).
- */
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Constructor injection — Spring automatically supplies UserRepository
-    // here at startup. Preferred over @Autowired on a field because it
-    // makes the dependency explicit and the class easier to unit test.
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    // Existing generic create — still used by non-auth flows (e.g. any
+    // remaining test/admin paths). Stores whatever password string it's
+    // given as-is; register() below is the properly-hashed path and is
+    // what /api/auth/register actually calls starting today.
     public User createUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException(
                     "A user with email " + user.getEmail() + " already exists");
         }
+        return userRepository.save(user);
+    }
+
+    // Proper registration path — hashes the password with BCrypt before
+    // ever touching the database. From today onward, this is what real
+    // signups go through; createUser() above stays only for internal/
+    // legacy callers that pass an already-hashed value.
+    public User register(String name, String email, String rawPassword,
+                          String phone, Double latitude, Double longitude) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("A user with email " + email + " already exists");
+        }
+
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(rawPassword)); // never store rawPassword directly
+        user.setPhone(phone);
+        user.setLatitude(latitude);
+        user.setLongitude(longitude);
+
         return userRepository.save(user);
     }
 
@@ -45,15 +64,12 @@ public class UserService {
     }
 
     public User updateUser(Long id, User updatedUser) {
-        User existing = getUser(id); // reuses the lookup + exception above
+        User existing = getUser(id);
 
         existing.setName(updatedUser.getName());
         existing.setPhone(updatedUser.getPhone());
         existing.setLatitude(updatedUser.getLatitude());
         existing.setLongitude(updatedUser.getLongitude());
-        // Email and password intentionally excluded here — those get
-        // dedicated endpoints later (Day 39+) with their own validation
-        // rather than being silently overwritten by a generic update.
 
         return userRepository.save(existing);
     }
