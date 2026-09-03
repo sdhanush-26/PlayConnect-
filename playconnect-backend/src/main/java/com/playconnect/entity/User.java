@@ -37,8 +37,18 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    // Defaults every new user to PLAYER. Existing rows created before
+    // this column existed will need a one-time backfill — see the
+    // migration note in the Day 42 instructions.
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.PLAYER;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.role == null) {
+            this.role = Role.PLAYER;
+        }
     }
 }

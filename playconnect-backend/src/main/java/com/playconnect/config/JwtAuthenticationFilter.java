@@ -50,13 +50,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.isTokenValid(token)) {
                 String email = jwtUtil.extractEmail(token);
                 Long userId = jwtUtil.extractUserId(token);
+                String role = jwtUtil.extractRole(token);
 
-                // No roles/authorities attached yet — that arrives Day 42
-                // when PLAYER/ADMIN roles exist. An empty authorities list
-                // just means "we know who this is" without granting any
-                // specific permission.
+                // ROLE_ prefix is a Spring Security convention — hasRole("ADMIN")
+                // checks internally look for an authority named "ROLE_ADMIN".
+                java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities =
+                        role != null
+                                ? java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role))
+                                : Collections.emptyList();
+
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
                 authToken.setDetails(userId);
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);

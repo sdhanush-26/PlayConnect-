@@ -23,7 +23,8 @@ public class AuthTestController {
         return Map.of(
                 "authenticated", true,
                 "email", authentication.getName(),
-                "userId", authentication.getDetails()
+                "userId", authentication.getDetails(),
+                "roles", authentication.getAuthorities()
         );
     }
 }

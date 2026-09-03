@@ -22,14 +22,19 @@ public class JwtUtil {
     private final SecretKey key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
     private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-    public String generateToken(Long userId, String email) {
+    public String generateToken(Long userId, String email, com.playconnect.entity.Role role) {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
+                .claim("role", role.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(key)
                 .compact();
+    }
+
+    public String extractRole(String token) {
+        return extractClaims(token).get("role", String.class);
     }
 
     public String extractEmail(String token) {
