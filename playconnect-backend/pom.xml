@@ -56,6 +56,29 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- JWT (JSON Web Token) — used from Day 40 onward to issue and
+             validate login tokens. jjwt-api is the interface you code
+             against; jjwt-impl/jjwt-jackson are the runtime implementation,
+             kept as separate runtime-only jars so they don't leak into
+             your own code's compile-time dependencies. -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Lombok — cuts down boilerplate getters/setters/constructors -->
         <dependency>
             <groupId>org.projectlombok</groupId>

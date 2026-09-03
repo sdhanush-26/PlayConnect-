@@ -54,6 +54,27 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Verifies email/password against the stored hash. passwordEncoder
+    // .matches() is the only correct way to do this comparison — BCrypt
+    // hashes can't be reversed, so this hashes the incoming raw password
+    // using the same salt embedded in the stored hash and compares the
+    // results, rather than ever decoding anything.
+    public User login(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new com.playconnect.exception.InvalidCredentialsException(
+                        "Invalid email or password"));
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            // Deliberately the same error message as "user not found" above —
+            // revealing which one failed would let an attacker enumerate
+            // valid email addresses by trying logins and reading the error.
+            throw new com.playconnect.exception.InvalidCredentialsException(
+                    "Invalid email or password");
+        }
+
+        return user;
+    }
+
     public User getUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new PlayerNotFoundException(id));
