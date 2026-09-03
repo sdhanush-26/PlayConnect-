@@ -1,5 +1,6 @@
 package com.playconnect.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,35 +9,43 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Day 38 baseline: adds Spring Security to the project without breaking
- * any existing endpoint. Everything stays open (permitAll) for now —
- * real JWT-based protection gets wired in on Day 43 once login (Day 40)
- * and JWT generation/validation (Day 41) both exist. Building this
- * incrementally rather than locking everything down today, which would
- * break every Postman test built across Days 8-37.
+ * Day 38 added Spring Security with everything open (permitAll). Day 41
+ * adds JwtAuthenticationFilter into the chain so tokens actually get
+ * read and validated on every request — but since permitAll() is still
+ * active, nothing is rejected yet even without a token. Day 43 replaces
+ * permitAll() with real per-endpoint rules once roles exist (Day 42).
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt: industry-standard for password hashing — salts
-        // automatically and is deliberately slow to resist brute-force
-        // attacks. Used starting Day 39 for registration.
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // not needed for a stateless REST API
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll() // TEMPORARY — replaced with real rules on Day 43
-            );
+            )
+            // Runs our filter before Spring's own username/password filter,
+            // so by the time any endpoint logic runs, SecurityContextHolder
+            // already knows who (if anyone) the request is authenticated as.
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
