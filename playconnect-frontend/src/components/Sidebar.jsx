@@ -1,10 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../api/AuthContext';
 
-// Only shown when logged in — matches the plan's Dashboard sidebar
-// (Nearby Matches, Nearby Players, Your Matches, Recommended Players).
-// Those become real, clickable sections starting Day 48; today this is
-// just the navigational shell.
-function Sidebar({ isLoggedIn }) {
+function Sidebar() {
+  const { isLoggedIn } = useAuth();
   const location = useLocation();
 
   if (!isLoggedIn) return null;

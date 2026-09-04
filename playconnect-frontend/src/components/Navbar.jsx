@@ -1,10 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../api/AuthContext';
 
-// Demonstrates PROPS: this component receives isLoggedIn and userName
-// as inputs from whatever parent renders it (App.jsx), rather than
-// knowing about login state itself. That's the core idea of props —
-// data flows one direction, parent to child.
-function Navbar({ isLoggedIn, userName }) {
+function Navbar() {
+  const { isLoggedIn, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/');
+  }
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">PlayConnect 🏏</Link>
@@ -14,7 +19,8 @@ function Navbar({ isLoggedIn, userName }) {
           <>
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/profile">Profile</Link>
-            <span className="navbar-user">Hi, {userName}</span>
+            <span className="navbar-user">Hi, {user.name}</span>
+            <button className="navbar-logout" onClick={handleLogout}>Logout</button>
           </>
         ) : (
           <>

@@ -27,6 +27,20 @@
   margin-left: 1.5rem;
   opacity: 0.8;
 }
+.navbar-logout {
+  margin-left: 1rem;
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.form-error {
+  color: #d33;
+  font-size: 0.9rem;
+  margin: 0;
+}
 
 .app-body {
   display: flex;

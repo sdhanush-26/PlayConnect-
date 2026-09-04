@@ -1,17 +1,30 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '../api/client';
+import { useAuth } from '../api/AuthContext';
 
-// Demonstrates STATE + HOOKS: useState gives this component its own
-// local memory (email, password) that persists between re-renders and
-// triggers a re-render whenever it changes — that's what makes typing
-// into these inputs actually show up on screen.
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    // Real API call to POST /api/auth/login arrives Day 47.
-    console.log('Login attempt:', { email, password });
+    setError('');
+    setLoading(true);
+    try {
+      const response = await authApi.login({ email, password });
+      login(response); // stores token + user, updates context
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -30,7 +43,10 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Log In</button>
+        {error && <p className="form-error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Log In'}
+        </button>
       </form>
     </div>
   );

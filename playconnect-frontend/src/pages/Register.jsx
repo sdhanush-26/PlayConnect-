@@ -1,16 +1,33 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '../api/client';
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    // Real API call to POST /api/auth/register arrives Day 47.
-    console.log('Register attempt:', form);
+    setError('');
+    setLoading(true);
+    try {
+      await authApi.register(form);
+      // Registration doesn't log the user in automatically — sending
+      // them to Login keeps the two flows clearly separate, matching
+      // how the backend's register/login endpoints are split.
+      navigate('/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -22,11 +39,14 @@ function Register() {
         <input
           name="password"
           type="password"
-          placeholder="Password"
+          placeholder="Password (min 8 characters)"
           value={form.password}
           onChange={handleChange}
         />
-        <button type="submit">Create Account</button>
+        {error && <p className="form-error">{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Creating account...' : 'Create Account'}
+        </button>
       </form>
     </div>
   );
