@@ -23,10 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final SecurityErrorHandlers securityErrorHandlers;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                           SecurityErrorHandlers securityErrorHandlers) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.securityErrorHandlers = securityErrorHandlers;
     }
 
     @Bean
@@ -40,11 +43,43 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // TEMPORARY — replaced with real rules on Day 43
+                // Public — no token required. Registration/login obviously
+                // can't require being already logged in. Read-only browsing
+                // (search, listings) stays open too, matching how the app
+                // has worked since Day 12 — PlayConnect lets people browse
+                // before committing to an account, only requiring auth for
+                // actions that change data or reveal personal info.
+                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                        "/api/health", "/api/sports/**", "/api/matches", "/api/matches/**",
+                        "/api/players", "/api/players/**", "/api/grounds", "/api/grounds/**")
+                .permitAll()
+
+                // Protected — requires a valid token (any role). Covers
+                // exactly what the Day 43 plan calls out: Profile, Create
+                // Match, Join Match. Chat isn't built yet (Day 52-53), so
+                // there's nothing to protect there today.
+                .requestMatchers("/api/profile/**").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/matches").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/matches/*/join").authenticated()
+
+                // Admin-only — requires the ADMIN role specifically.
+                // Creating/deleting sports and grounds are catalog-level
+                // changes that shouldn't be open to every player.
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/sports").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/sports/**").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/grounds").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/grounds/**").hasRole("ADMIN")
+
+                // Everything else not explicitly listed above also
+                // requires authentication — a safe default so newly added
+                // endpoints don't accidentally end up wide open.
+                .anyRequest().authenticated()
             )
-            // Runs our filter before Spring's own username/password filter,
-            // so by the time any endpoint logic runs, SecurityContextHolder
-            // already knows who (if anyone) the request is authenticated as.
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(securityErrorHandlers)
+                .accessDeniedHandler(securityErrorHandlers)
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
