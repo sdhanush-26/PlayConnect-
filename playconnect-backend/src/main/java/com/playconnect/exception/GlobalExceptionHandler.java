@@ -60,6 +60,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    // 400 — empty, malformed, or unparseable JSON body. Found during Day 44
+    // security testing: without this, an empty POST body fell through to
+    // the generic 500 handler below, which is misleading — a client
+    // sending bad JSON is a client error, not a server failure.
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleMalformedJson(
+            org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST,
+                "Request body is missing or not valid JSON");
+    }
+
     // 500 — catch-all safety net for anything unexpected.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
