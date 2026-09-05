@@ -35,3 +35,23 @@ export const authApi = {
   login: (payload) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
 };
+
+export const profileApi = {
+  get: (userId) => request(`/profile/${userId}`),
+};
+
+export const matchesApi = {
+  // "Nearby matches within 25km" — matches the plan's default radius options.
+  getNearby: (latitude, longitude, radiusKm = 25) =>
+    request(`/matches/nearby?latitude=${latitude}&longitude=${longitude}&radiusKm=${radiusKm}`),
+
+  getUpcomingForUser: (userId) =>
+    request(`/matches/user/${userId}/upcoming`),
+};
+
+export const playersApi = {
+  // Uses the logged-in user's own saved profile location (Day 35) —
+  // no need to ask the browser for GPS permission just for the dashboard.
+  getNearbyForMe: (userId, radiusKm = 25) =>
+    request(`/players/nearby/me?userId=${userId}&radiusKm=${radiusKm}`),
+};
