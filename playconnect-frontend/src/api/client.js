@@ -36,6 +36,25 @@ export const authApi = {
     request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
 };
 
+export const sportsApi = {
+  getAll: () => request('/sports'),
+};
+
+export const searchApi = {
+  // Mirrors backend's optional-filter design (Day 20) — only params
+  // that are actually set get included in the query string, so an
+  // empty filter still returns everyone rather than an empty result.
+  searchPlayers: ({ sportId, skillLevel, latitude, longitude, radiusKm }) => {
+    const params = new URLSearchParams();
+    if (sportId) params.set('sportId', sportId);
+    if (skillLevel) params.set('skillLevel', skillLevel);
+    if (latitude != null) params.set('latitude', latitude);
+    if (longitude != null) params.set('longitude', longitude);
+    if (radiusKm) params.set('radiusKm', radiusKm);
+    return request(`/players?${params.toString()}`);
+  },
+};
+
 export const profileApi = {
   get: (userId) => request(`/profile/${userId}`),
 };

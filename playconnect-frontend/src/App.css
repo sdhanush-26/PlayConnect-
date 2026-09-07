@@ -91,6 +91,59 @@
   font-weight: 500;
 }
 
+.page-wide {
+  max-width: 700px;
+  margin: 0 auto;
+}
+.search-filters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: #f8f8fb;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.search-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.search-filters select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.filter-hint {
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: #888;
+}
+.search-filters button {
+  grid-column: span 2;
+  padding: 0.6rem;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.search-result-item {
+  padding: 0.75rem;
+  background: #f8f8fb;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+.search-results ul {
+  list-style: none;
+  padding: 0;
+}
+
 .app-body {
   display: flex;
   flex: 1;
