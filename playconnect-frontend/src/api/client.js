@@ -57,6 +57,16 @@ export const searchApi = {
 
 export const profileApi = {
   get: (userId) => request(`/profile/${userId}`),
+  update: (userId, payload) =>
+    request(`/profile/${userId}`, { method: 'PUT', body: JSON.stringify(payload) }),
+};
+
+export const playerSportsApi = {
+  add: (userId, sportId, skillLevel) =>
+    request('/player-sports', {
+      method: 'POST',
+      body: JSON.stringify({ userId, sportId, skillLevel }),
+    }),
 };
 
 export const matchesApi = {

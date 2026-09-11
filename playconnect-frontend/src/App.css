@@ -270,6 +270,57 @@
   border-color: #1a1a2e;
 }
 
+.profile-card {
+  background: #f8f8fb;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+}
+.profile-card p {
+  margin: 0.4rem 0;
+}
+.profile-card button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.profile-edit-form {
+  margin-bottom: 1.5rem;
+}
+.btn-secondary {
+  background: #999 !important;
+}
+.add-sport-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+.add-sport-form select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.add-sport-form button {
+  padding: 0.5rem 1rem;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.add-sport-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .app-body {
   display: flex;
   flex: 1;
