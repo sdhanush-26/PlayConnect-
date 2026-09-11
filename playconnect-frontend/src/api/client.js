@@ -66,6 +66,27 @@ export const matchesApi = {
 
   getUpcomingForUser: (userId) =>
     request(`/matches/user/${userId}/upcoming`),
+
+  getCompletedForUser: (userId) =>
+    request(`/matches/user/${userId}/completed`),
+
+  getCancelledForUser: (userId) =>
+    request(`/matches/user/${userId}/cancelled`),
+
+  getById: (matchId) =>
+    request(`/matches/${matchId}`),
+
+  create: (payload) =>
+    request('/matches', { method: 'POST', body: JSON.stringify(payload) }),
+
+  join: (matchId, userId) =>
+    request(`/matches/${matchId}/join?userId=${userId}`, { method: 'POST' }),
+
+  leave: (matchId, userId) =>
+    request(`/matches/${matchId}/leave?userId=${userId}`, { method: 'DELETE' }),
+
+  getPlayers: (matchId) =>
+    request(`/matches/${matchId}/players`),
 };
 
 export const playersApi = {

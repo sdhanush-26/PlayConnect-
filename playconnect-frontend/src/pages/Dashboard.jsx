@@ -47,7 +47,10 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h1>Welcome {user.name} 👋</h1>
+      <div className="dashboard-header">
+        <h1>Welcome {user.name} 👋</h1>
+        <Link to="/matches/create" className="btn-create-match">+ Create Match</Link>
+      </div>
       {error && <p className="form-error">{error}</p>}
 
       <div className="dashboard-grid">
@@ -59,7 +62,9 @@ function Dashboard() {
             <ul>
               {nearbyMatches.map((m) => (
                 <li key={m.id}>
-                  <strong>{m.title}</strong> — {m.sportName}, {m.distanceKm} km away
+                  <Link to={`/matches/${m.id}`}>
+                    <strong>{m.title}</strong> — {m.sportName}, {m.distanceKm} km away
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -89,7 +94,9 @@ function Dashboard() {
             <ul>
               {myMatches.map((m) => (
                 <li key={m.id}>
-                  <strong>{m.title}</strong> — {m.matchDate} at {m.startTime}
+                  <Link to={`/matches/${m.id}`}>
+                    <strong>{m.title}</strong> — {m.matchDate} at {m.startTime}
+                  </Link>
                 </li>
               ))}
             </ul>
