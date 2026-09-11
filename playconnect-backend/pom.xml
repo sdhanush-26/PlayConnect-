@@ -79,6 +79,15 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- WebSocket + STOMP — real-time chat (Day 53) and notifications
+             (Day 54) run over this instead of regular request/response
+             REST calls, since the server needs to push messages to
+             connected clients the instant they happen. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- Lombok — cuts down boilerplate getters/setters/constructors -->
         <dependency>
             <groupId>org.projectlombok</groupId>

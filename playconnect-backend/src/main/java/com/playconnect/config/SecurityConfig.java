@@ -38,8 +38,28 @@ public class SecurityConfig {
     }
 
     @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        // Without this, the browser blocks every request from the React
+        // dev server (localhost:5173) to the API (localhost:8080) — they
+        // count as different origins even though both are "localhost".
+        // This whitelist gets replaced with your real deployed frontend
+        // URL once Day 59 deployment happens.
+        org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+        config.setAllowedOrigins(java.util.List.of("http://localhost:5173"));
+        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(java.util.List.of("*"));
+        config.setAllowCredentials(true);
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
+                new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
@@ -50,6 +70,7 @@ public class SecurityConfig {
                 // before committing to an account, only requiring auth for
                 // actions that change data or reveal personal info.
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                .requestMatchers("/ws/**").permitAll() // WebSocket handshake (Day 52) — auth happens inside the STOMP session itself, not at this HTTP layer
                 .requestMatchers(org.springframework.http.HttpMethod.GET,
                         "/api/health", "/api/sports/**", "/api/matches", "/api/matches/**",
                         "/api/players", "/api/players/**", "/api/grounds", "/api/grounds/**")
