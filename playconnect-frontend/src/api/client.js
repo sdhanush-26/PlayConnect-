@@ -69,6 +69,10 @@ export const playerSportsApi = {
     }),
 };
 
+export const messagesApi = {
+  getHistory: (matchId) => request(`/matches/${matchId}/messages`),
+};
+
 export const matchesApi = {
   // "Nearby matches within 25km" — matches the plan's default radius options.
   getNearby: (latitude, longitude, radiusKm = 25) =>

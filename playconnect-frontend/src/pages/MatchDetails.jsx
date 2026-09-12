@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../api/AuthContext';
 import { matchesApi } from '../api/client';
+import Chat from '../components/Chat';
 
 function MatchDetails() {
   const { matchId } = useParams();
@@ -103,6 +104,8 @@ function MatchDetails() {
           ))}
         </ul>
       )}
+
+      <Chat matchId={matchId} />
     </div>
   );
 }
