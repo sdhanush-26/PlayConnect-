@@ -69,6 +69,13 @@ export const playerSportsApi = {
     }),
 };
 
+export const notificationsApi = {
+  getForUser: (userId) => request(`/notifications/user/${userId}`),
+  getUnreadCount: (userId) => request(`/notifications/user/${userId}/unread-count`),
+  markAsRead: (id) => request(`/notifications/${id}/read`, { method: 'PUT' }),
+  markAllAsRead: (userId) => request(`/notifications/user/${userId}/read-all`, { method: 'PUT' }),
+};
+
 export const messagesApi = {
   getHistory: (matchId) => request(`/matches/${matchId}/messages`),
 };
@@ -101,6 +108,11 @@ export const matchesApi = {
 
   getPlayers: (matchId) =>
     request(`/matches/${matchId}/players`),
+
+  respondToJoinRequest: (matchId, targetUserId, requesterId, status) =>
+    request(`/matches/${matchId}/players/${targetUserId}?requesterId=${requesterId}&status=${status}`, {
+      method: 'PUT',
+    }),
 };
 
 export const playersApi = {

@@ -321,6 +321,170 @@
   cursor: not-allowed;
 }
 
+.chat-box {
+  margin-top: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+}
+.chat-header {
+  background: #1a1a2e;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+}
+.chat-status-live { color: #7ee787; font-size: 0.8rem; }
+.chat-status-offline { color: #ffab70; font-size: 0.8rem; }
+.chat-messages {
+  height: 260px;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #f8f8fb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.chat-message {
+  max-width: 70%;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+.chat-message.mine {
+  align-self: flex-end;
+  background: #1a1a2e;
+  color: white;
+  border-color: #1a1a2e;
+}
+.chat-sender {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-bottom: 0.15rem;
+}
+.chat-input-row {
+  display: flex;
+  border-top: 1px solid #e0e0e0;
+}
+.chat-input-row input {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  outline: none;
+}
+.chat-input-row button {
+  padding: 0 1.25rem;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.chat-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notification-bell {
+  position: relative;
+  margin-left: 1rem;
+}
+.bell-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  position: relative;
+  color: white;
+}
+.bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #d33;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-weight: bold;
+}
+.notification-dropdown {
+  position: absolute;
+  top: 130%;
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  text-align: left;
+}
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+}
+.mark-all-read {
+  background: none;
+  border: none;
+  color: #1a1a2e;
+  font-size: 0.75rem;
+  font-weight: normal;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.notification-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.notification-item p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.notification-item.unread {
+  background: #f0f4ff;
+}
+.notification-time {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.roster-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.roster-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.btn-accept, .btn-reject {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: white;
+}
+.btn-accept { background: #1a7a3a; }
+.btn-reject { background: #a32; }
+.btn-accept:disabled, .btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .app-body {
   display: flex;
   flex: 1;

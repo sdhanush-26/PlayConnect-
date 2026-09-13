@@ -34,7 +34,20 @@ function MatchDetails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId]);
 
-  const alreadyJoined = players.some((p) => p.userId === user?.userId);
+  const isCreator = match?.creatorId === user?.userId;
+
+  async function handleRespond(targetUserId, status) {
+    setActionLoading(true);
+    setError('');
+    try {
+      await matchesApi.respondToJoinRequest(matchId, targetUserId, user.userId, status);
+      await loadMatch();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   async function handleJoin() {
     setActionLoading(true);
@@ -98,8 +111,14 @@ function MatchDetails() {
       ) : (
         <ul className="roster-list">
           {players.map((p) => (
-            <li key={p.id}>
-              {p.userName} — <span className={`status-badge status-${p.joinStatus.toLowerCase()}`}>{p.joinStatus}</span>
+            <li key={p.id} className="roster-row">
+              <span>{p.userName} — <span className={`status-badge status-${p.joinStatus.toLowerCase()}`}>{p.joinStatus}</span></span>
+              {isCreator && p.joinStatus === 'PENDING' && (
+                <span className="roster-actions">
+                  <button onClick={() => handleRespond(p.userId, 'ACCEPTED')} disabled={actionLoading} className="btn-accept">Accept</button>
+                  <button onClick={() => handleRespond(p.userId, 'REJECTED')} disabled={actionLoading} className="btn-reject">Reject</button>
+                </span>
+              )}
             </li>
           ))}
         </ul>

@@ -1,14 +1,21 @@
 package com.playconnect.service;
 
-import com.playconnect.entity.*;
-import com.playconnect.exception.InvalidMatchException;
-import com.playconnect.repository.MatchPlayerRepository;
-import com.playconnect.repository.MatchRepository;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import com.playconnect.entity.JoinStatus;
+import com.playconnect.entity.Match;
+import com.playconnect.entity.MatchPlayer;
+import com.playconnect.entity.MatchStatus;
+import com.playconnect.entity.NotificationType;
+import com.playconnect.entity.Sport;
+import com.playconnect.entity.User;
+import com.playconnect.exception.InvalidMatchException;
+import com.playconnect.repository.MatchPlayerRepository;
+import com.playconnect.repository.MatchRepository;
 
 @Service
 public class MatchService {
@@ -17,14 +24,17 @@ public class MatchService {
     private final MatchPlayerRepository matchPlayerRepository;
     private final UserService userService;
     private final SportService sportService;
+    private final NotificationService notificationService;
 
     @Autowired
     public MatchService(MatchRepository matchRepository, MatchPlayerRepository matchPlayerRepository,
-                         UserService userService, SportService sportService) {
+                         UserService userService, SportService sportService,
+                         NotificationService notificationService) {
         this.matchRepository = matchRepository;
         this.matchPlayerRepository = matchPlayerRepository;
         this.userService = userService;
         this.sportService = sportService;
+        this.notificationService = notificationService;
     }
 
     public Match createMatch(String title, Long creatorId, Long sportId, String location,
@@ -88,6 +98,7 @@ public class MatchService {
         matchPlayer.setUser(user);
         matchPlayer.setJoinStatus(JoinStatus.PENDING);
         MatchPlayer saved = matchPlayerRepository.save(matchPlayer);
+        notificationService.create(match.getCreator().getId(), NotificationType.JOIN_REQUEST, user.getName() + " wants to join your match: " + match.getTitle());
 
         // If this join filled the match exactly, flip status to FULL —
         // keeps match.status accurate for search/listing without the
@@ -138,6 +149,9 @@ public class MatchService {
                         "This player has not requested to join this match"));
 
         matchPlayer.setJoinStatus(newStatus);
+        if (newStatus == JoinStatus.ACCEPTED) {
+            notificationService.create(matchPlayer.getUser().getId(), NotificationType.REQUEST_ACCEPTED, "Your request to join \\\"" + match.getTitle() + "\\\" was accepted!");
+        }
         return matchPlayerRepository.save(matchPlayer);
     }
 
